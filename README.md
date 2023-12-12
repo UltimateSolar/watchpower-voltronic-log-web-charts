@@ -1,5 +1,7 @@
 ===== watchpower-voltronic-log-web-charts  =====
 
+![Screenshot](/UltimateSolar/watchpower-voltronic-log-web-charts/blob/main/watchpower-voltronic-log-web-charts%20.png?raw=true "Screenshot")
+
 IT WORKS BUT FAR FROM "FINISHED" :D
 
 this is a PHP + HTML + JS based "program" that can read log files created by the WatchPower solar hybrid inverter monitoring software (Java based)
