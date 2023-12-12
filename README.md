@@ -1,6 +1,6 @@
 ===== watchpower-voltronic-log-web-charts  =====
 
-![Screenshot](./watchpower-voltronic-log-web-charts/blob/main/watchpower-voltronic-log-web-charts%20.png?raw=true "Screenshot")
+![Screenshot](./watchpower-voltronic-log-web-charts%20.png?raw=true "Screenshot")
 
 IT WORKS BUT FAR FROM "FINISHED" :D
 
