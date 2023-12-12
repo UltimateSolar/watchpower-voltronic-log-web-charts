@@ -1,4 +1,4 @@
-===== watchpower-voltronic-log-web-charts  =====
+# watchpower-voltronic-log-web-charts v1
 
 ![Screenshot](./watchpower-voltronic-log-web-charts%20.png?raw=true "Screenshot")
 
