@@ -1,6 +1,8 @@
 <?php
 date_default_timezone_set('CET'); // modify if not Europe/Berlin
-/* nice graphical web view of voltronic-masterpower-watchpower output logs
+
+/* ==== watchpower-voltronic-log-web-charts v1.2 ====
+ * nice graphical web view of voltronic-masterpower-watchpower output logs
  * requirements:
  *  o have watchpower running on GNU linux
  *  o enable top right corner -> debug mode -> it will output log files
@@ -34,6 +36,9 @@ if($handle = opendir($path2data))
 /* sort filenames by date  */
 $order = array();
 
+// sanitize input
+$input = htmlspecialchars($_REQUEST["button"]);
+
 $target = count($array_files);
 for($i=0;$i<$target;$i++)
 {
@@ -45,6 +50,25 @@ for($i=0;$i<$target;$i++)
 
 array_multisort($order, SORT_ASC, $array_files); // does the sorting
 
+$array_files_all = $array_files; // backup copy to generate buttons
+$array_files_show = Array();
+
+if($input == "ShowAll")
+{
+    $array_files_show = $array_files; // show all
+}
+else // it will be a date
+{
+    foreach ($array_files as $key => $value)
+    {
+        if($value == $input)
+        {
+            array_push($array_files_show,$input);
+            break;
+        }
+    }
+}
+
 /* hold the data */
 $chart_data_string = "";
 $chart_data_string_date = "[";
@@ -52,7 +76,7 @@ $chart_data_string_pv_input_watts = "[";
 $chart_data_string_consumed_watts = "[";
 
 // iterate over all lines and extract values
-foreach ($array_files as $key => $value)
+foreach ($array_files_show as $key => $value)
 {
     $fileName = $value;
     $fileName_and_path = $path2data."/".$fileName." USB-QPIGS.log";
@@ -167,8 +191,25 @@ const data = [
   <title>Line Chart</title>
   <!-- Include Chart.js library -->
   <script src="js/chart.js"></script>
+  <style>
+  .form {
+    position: relative;
+    float: left;
+  }
+  </style>
 </head>
-<body>
+<body style="min-width: 100%; min-height: 100%;">
+	<div id="border1" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; border: 5px solid red;">
+	<div id="border2" style="position: relative; float: left; min-width: 100%; border: 5px solid blue;">
+		<form class="form" action="index.php" method="post"><button name="button" value="ShowAll" type="submit" class="btn btn-primary">ShowAll</button></form>
+		<?php
+		foreach ($array_files_all as $key => $value)
+		{
+		    $array_filename_segments = explode(" ", $value);
+		    echo '<form class="form" action="index.php" method="post"><button name="button" value="'.$array_filename_segments[0].'" type="submit" class="btn btn-primary">'.$array_filename_segments[0].'</button></form>';
+		}
+		?>
+	</div>
   <!-- Create a canvas element to render the chart -->
   <canvas id="myChart" width="2048" height="1024" style="background-color: #444;"></canvas>
 
@@ -260,5 +301,6 @@ const data = [
       }
     });
   </script>
+  </div>
 </body>
 </html>
