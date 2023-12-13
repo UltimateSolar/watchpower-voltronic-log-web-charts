@@ -25,9 +25,13 @@ if($handle = opendir($path2data))
         if ('..' === $filename) continue;
         // do something with the file
         $array_filename_segments = explode('.',$filename);
+
         if(end($array_filename_segments) == "log") // if file ending is log proeed
         {
-            array_push($array_files,$filename);
+            if(str_contains($filename, "USB-QPIGS"))
+            {
+                array_push($array_files,$filename);
+            }
         }
     }
     closedir($handle);
