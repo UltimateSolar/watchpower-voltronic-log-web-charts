@@ -1,7 +1,8 @@
 <?php
 date_default_timezone_set('CET'); // modify if not Europe/Berlin
 
-/* ==== watchpower-voltronic-log-web-charts v1.2 ====
+$title = "=== watchpower-voltronic-log-web-charts v1.2 ===";
+/* what is it?
  * nice graphical web view of voltronic-masterpower-watchpower output logs
  * requirements:
  *  o have watchpower running on GNU linux
@@ -12,6 +13,10 @@ date_default_timezone_set('CET'); // modify if not Europe/Berlin
  *  refreshrate is per default 2sec
  *  :D
  */
+
+// defaults
+$input_show = "ShowAll"; // holds the date to show 2023-12-12 or ShowAll (all dates from all logs = can be A LOT OF DATAPOINTS (like millions) = heavy on CPU client side js)
+$input_skip = 2; // show every nth datapoint (if too much data in the logs (millions of recrods)
 
 // iterate over all files in the ./data directory
 $array_files = array();
@@ -41,7 +46,10 @@ if($handle = opendir($path2data))
 $order = array();
 
 // sanitize input
-$input = htmlspecialchars($_REQUEST["button"]);
+if(isset($_REQUEST["button"]))
+{
+    $input_show = htmlspecialchars($_REQUEST["button"]);
+}
 
 $target = count($array_files);
 for($i=0;$i<$target;$i++)
@@ -57,7 +65,7 @@ array_multisort($order, SORT_ASC, $array_files); // does the sorting
 $array_files_all = $array_files; // backup copy to generate buttons
 $array_files_show = Array();
 
-if($input == "ShowAll")
+if($input_show == "ShowAll")
 {
     $array_files_show = $array_files; // show all
 }
@@ -65,9 +73,9 @@ else // it will be a date
 {
     foreach ($array_files as $key => $value)
     {
-        if($value == $input)
+        if($value == $input_show)
         {
-            array_push($array_files_show,$input);
+            array_push($array_files_show,$input_show);
             break;
         }
     }
@@ -76,8 +84,9 @@ else // it will be a date
 /* hold the data */
 $chart_data_string = "";
 $chart_data_string_date = "[";
-$chart_data_string_pv_input_watts = "[";
+$chart_data_string_solar_input_watts = "[";
 $chart_data_string_consumed_watts = "[";
+$chart_data_string_batt_volt = "[";
 
 // iterate over all lines and extract values
 foreach ($array_files_show as $key => $value)
@@ -85,9 +94,21 @@ foreach ($array_files_show as $key => $value)
     $fileName = $value;
     $fileName_and_path = $path2data."/".$fileName." USB-QPIGS.log";
     $lines = file($fileName_and_path) or die("can't open ".$fileName." file"); // changes "2023-10-30" back to full filename "2023-10-30 USB-QPIGS.log"
+
+    // reduce dataset if too large
+    $lines_less = array();
+    $i = 0;
+    foreach($lines as $value) {
+        if ($i++ % $input_skip == 0) {
+            $lines_less[] = $value;
+        }
+    }
+    
+    // $before = count($lines); // 1176
+    // $after = count($lines_less); // 588
     
     // Durchgehen des Arrays und Anzeigen des HTML-Quelltexts inkl. Zeilennummern
-    foreach ($lines as $line_num => $line)
+    foreach ($lines_less as $line_num => $line)
     {
         $line = trim($line, " \t."); // remove trailing newline
         $line = trim($line, " \n.");
@@ -137,13 +158,18 @@ foreach ($array_files_show as $key => $value)
             $chart_data_string_consumed_watts = $chart_data_string_consumed_watts.$watts.", ";
         }
         
+        if(isset($array_line[10])) // field 10 = batt voltage
+        {
+            $chart_data_string_batt_volt = $chart_data_string_batt_volt.$array_line[10].", ";
+        }
+        
         if(isset($array_line[21])) // field 21 = watts PV input?
         {
             $watts = $array_line[21];
             $watts = ltrim($watts, '0'); // delete all leading 000123
             if(empty($watts)) $watts = "0"; // if value was 0000 it would be empty now so assign minimum value
             // search all elements of this array // replace by nothing  // in this string
-            $chart_data_string_pv_input_watts = $chart_data_string_pv_input_watts.$watts.", ";
+            $chart_data_string_solar_input_watts = $chart_data_string_solar_input_watts.$watts.", ";
         }
     }
 }
@@ -155,13 +181,17 @@ $chart_data_string_date = substr($chart_data_string_date, 0, -1);
 $chart_data_string_consumed_watts = substr($chart_data_string_consumed_watts, 0, -1);
 $chart_data_string_consumed_watts = substr($chart_data_string_consumed_watts, 0, -1);
 
-$chart_data_string_pv_input_watts = substr($chart_data_string_pv_input_watts, 0, -1);
-$chart_data_string_pv_input_watts = substr($chart_data_string_pv_input_watts, 0, -1);
+$chart_data_string_solar_input_watts = substr($chart_data_string_solar_input_watts, 0, -1);
+$chart_data_string_solar_input_watts = substr($chart_data_string_solar_input_watts, 0, -1);
+
+$chart_data_string_batt_volt = substr($chart_data_string_batt_volt, 0, -1);
+$chart_data_string_batt_volt = substr($chart_data_string_batt_volt, 0, -1);
 
 // close the braket
 $chart_data_string_date = $chart_data_string_date."]";
-$chart_data_string_pv_input_watts = $chart_data_string_pv_input_watts."]";
+$chart_data_string_solar_input_watts = $chart_data_string_solar_input_watts."]";
 $chart_data_string_consumed_watts = $chart_data_string_consumed_watts."]";
+$chart_data_string_batt_volt = $chart_data_string_batt_volt."]";
 
 
 /* manual modifications
@@ -173,7 +203,7 @@ $chart_data_string_consumed_watts = $chart_data_string_consumed_watts."]";
 const data = [
 <?php echo $chart_data_string_date.","; ?>
 <?php echo $chart_data_string_consumed_watts; ?>
-<?php echo $chart_data_string_pv_input_watts; ?>
+<?php echo $chart_data_string_solar_input_watts; ?>
 ];
 
 /*
@@ -192,7 +222,7 @@ const data = [
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Line Chart</title>
+  <title><?php echo $title; ?></title>
   <!-- Include Chart.js library -->
   <script src="js/chart.js"></script>
   <style>
@@ -200,37 +230,43 @@ const data = [
     position: relative;
     float: left;
   }
+  body, html {
+    width: 100%;
+    height: 100%;
+  }
+  
   </style>
 </head>
-<body style="min-width: 100%; min-height: 100%;">
-	<div id="border1" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; border: 5px solid red;">
-	<div id="border2" style="position: relative; float: left; min-width: 100%; border: 5px solid blue;">
-		<form class="form" action="index.php" method="post"><button name="button" value="ShowAll" type="submit" class="btn btn-primary">ShowAll</button></form>
-		<?php
-		foreach ($array_files_all as $key => $value)
-		{
-		    $array_filename_segments = explode(" ", $value);
-		    echo '<form class="form" action="index.php" method="post"><button name="button" value="'.$array_filename_segments[0].'" type="submit" class="btn btn-primary">'.$array_filename_segments[0].'</button></form>';
-		}
-		?>
-	</div>
-  <!-- Create a canvas element to render the chart -->
-  <canvas id="myChart" width="2048" height="1024" style="background-color: #444;"></canvas>
+<body>
+	<div id="border1" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%;">
+    	<div id="border2" style="position: relative; float: left; min-width: 100%;">
+    		<form class="form" action="index.php" method="post"><button name="button" value="ShowAll" type="submit" class="btn btn-primary">ShowAll</button></form>
+    		<?php
+    		foreach ($array_files_all as $key => $value)
+    		{
+    		    $array_filename_segments = explode(" ", $value);
+    		    echo '<form class="form" action="index.php" method="post"><button name="button" value="'.$array_filename_segments[0].'" type="submit" class="btn btn-primary">'.$array_filename_segments[0].'</button></form>';
+    		}
+    		?>
+    	</div>
+    <!-- Create a canvas element to render the chart -->
+	<canvas id="myChart" width="2048" height="1024" style="background-color: #444;"></canvas>
 
   <script>
 // Data
 const data = [
 <?php echo $chart_data_string_date.",\n"; ?>
 <?php echo $chart_data_string_consumed_watts.",\n"; ?>
-<?php echo $chart_data_string_pv_input_watts."\n"; ?>
+<?php echo $chart_data_string_solar_input_watts.",\n"; ?>
+<?php echo $chart_data_string_batt_volt.",\n"; ?>
 ];
 
     // Extract x and y coordinates from the data
     const xValues = data[0];
     const yValues1 = data[1];
     const yValues2 = data[2];
-/*
     const yValues3 = data[3];
+/*
     const yValues4 = data[4];
 */
     // Function to format timestamp to YYYY-MM-DD hh:mm:ss
@@ -255,30 +291,30 @@ const data = [
         labels: xValues.map(value => formatTimestamp(value)),
         datasets: [
           {
-            label: 'consumed_watts?',
+            label: 'Out AC Watt consumed',
             data: yValues1,
-            borderColor: 'rgba(255, 99, 132, 1)',
+            borderColor: 'red', /* 'rgba(255, 99, 132, 1)' */
             borderWidth: 2,
             pointRadius: 5,
-            pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+            pointBackgroundColor: 'darkred', /* red: rgba(54, 162, 235, 1) */
           },
           {
-            label: 'pv_input_watts?',
+            label: 'Input Solar Watt',
             data: yValues2,
-            borderColor: 'rgba(54, 162, 235, 1)',
+            borderColor: '#ffa500', /* dark orange */
             borderWidth: 2,
             pointRadius: 5,
-            pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+            pointBackgroundColor: '#c27e00', /* orange */
+          },
+          {
+            label: 'Battery V',
+            data: yValues3,
+            borderColor: '#19ff00', /* dark green */
+            borderWidth: 2,
+            pointRadius: 5,
+            pointBackgroundColor: '#298f1f', /* bright green */
           },
 /*
-          {
-            label: 'Line 3',
-            data: yValues3,
-            borderColor: 'rgba(255, 206, 86, 1)',
-            borderWidth: 2,
-            pointRadius: 5,
-            pointBackgroundColor: 'rgba(255, 206, 86, 1)',
-          },
           {
             label: 'Line 4',
             data: yValues4,
