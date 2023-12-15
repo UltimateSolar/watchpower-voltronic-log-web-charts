@@ -269,7 +269,7 @@ a:link, a:visited .link_button {
   background-color: white;
   color: black;
   border: 2px solid orange;
-  padding: 10px 20px;
+  padding: 3px 5px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
@@ -308,8 +308,8 @@ a:hover, a:active .link_button
     // Data
     const data = [
     <?php echo $chart_data_string_date.",\n"; ?>
-    <?php echo $chart_data_string_consumed_watts.",\n"; ?>
     <?php echo $chart_data_string_solar_input_watts.",\n"; ?>
+    <?php echo $chart_data_string_consumed_watts.",\n"; ?>
     <?php echo $chart_data_string_batt_volt.",\n"; ?>
     ];
 
@@ -343,27 +343,27 @@ a:hover, a:active .link_button
         labels: xValues.map(value => formatTimestamp(value)),
         datasets: [
           {
-            label: 'Out AC Watt consumed',
+			label: 'Input Solar Watt',
             data: yValues1,
-            borderColor: 'red', /* 'rgba(255, 99, 132, 1)' */
-            borderWidth: 2,
-            pointRadius: 5,
-            pointBackgroundColor: 'darkred', /* red: rgba(54, 162, 235, 1) */
-          },
-          {
-            label: 'Input Solar Watt',
-            data: yValues2,
             borderColor: '#ffa500', /* dark orange */
             borderWidth: 2,
-            pointRadius: 5,
+            pointRadius: 3,
             pointBackgroundColor: '#c27e00', /* orange */
+          },
+          {
+            label: 'Out AC Watt consumed',
+            data: yValues2,
+            borderColor: 'red', /* 'rgba(255, 99, 132, 1)' */
+            borderWidth: 2,
+            pointRadius: 3,
+            pointBackgroundColor: 'darkred', /* red: rgba(54, 162, 235, 1) */
           },
           {
             label: 'Battery V',
             data: yValues3,
             borderColor: '#19ff00', /* dark green */
             borderWidth: 2,
-            pointRadius: 5,
+            pointRadius: 3,
             pointBackgroundColor: '#298f1f', /* bright green */
           },
 /*
