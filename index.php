@@ -16,7 +16,7 @@ $title = "=== watchpower-voltronic-log-web-charts v1.2 ===";
 
 // defaults
 $input_show = "ShowAll"; // holds the date to show 2023-12-12 or ShowAll (all dates from all logs = can be A LOT OF DATAPOINTS (like millions) = heavy on CPU client side js)
-$input_skip = 2; // show every nth datapoint (if too much data in the logs (millions of recrods)
+$input_skip = 5; // show every nth datapoint (if too much data in the logs (millions of recrods)
 
 // iterate over all files in the ./data directory
 $array_files = array();
@@ -81,6 +81,11 @@ else // it will be a date
     }
 }
 
+$array_stats = array(); // hold all timestamps with same index positions as in $lines_less
+$stats_kWh_produced = 0;
+$stats_kWh_consumed = 0;
+
+
 /* hold the data */
 $chart_data_string = "";
 $chart_data_string_date = "[";
@@ -108,8 +113,11 @@ foreach ($array_files_show as $key => $value)
     // $after = count($lines_less); // 588
     
     // Durchgehen des Arrays und Anzeigen des HTML-Quelltexts inkl. Zeilennummern
-    foreach ($lines_less as $line_num => $line)
+    $target = count($lines_less);
+    for($i=0;$i<$target;$i++)
     {
+        $line = $lines_less[$i];
+
         $line = trim($line, " \t."); // remove trailing newline
         $line = trim($line, " \n.");
         $line = trim($line, " \r.");
@@ -140,6 +148,9 @@ foreach ($array_files_show as $key => $value)
                     $date_timestamp = $date_parsed->getTimestamp(); // ms since 1970-01-01
                 }
                 
+                // write back to array in use for kWh calc
+                $array_stats[$i]["timestamp"] = $date_timestamp;
+
                 // search all elements of this array // replace by nothing  // in this string
                 $chart_data_string_date = $chart_data_string_date.$date_timestamp.", ";
             }
@@ -149,6 +160,18 @@ foreach ($array_files_show as $key => $value)
             }
         }
         
+        // calc time difference since last datapoint, it is assumed that wattage stayed the same in this period
+        if(isset($array_stats[$i-1])) // if there is no such element in the array this means the array is empty and currently processing the first element
+        {
+            $time_diff_ms = $array_stats[$i]["timestamp"] - $array_stats[$i-1]["timestamp"];
+        }
+        else
+        {
+            $time_diff_ms = 0;
+        }
+        
+        $time_diff_h = $time_diff_ms / 3600000;
+
         if(isset($array_line[7])) // field 7 = watts_consumed?
         {
             $watts = $array_line[7];
@@ -156,13 +179,15 @@ foreach ($array_files_show as $key => $value)
             if(empty($watts)) $watts = "0"; // if value was 0000 it would be empty now so assign minimum value
             // search all elements of this array // replace by nothing  // in this string
             $chart_data_string_consumed_watts = $chart_data_string_consumed_watts.$watts.", ";
+            
+            $stats_kWh_consumed = $stats_kWh_consumed + ($watts * $time_diff_h); // calc kWh
         }
         
         if(isset($array_line[10])) // field 10 = batt voltage
         {
             $chart_data_string_batt_volt = $chart_data_string_batt_volt.$array_line[10].", ";
         }
-        
+
         if(isset($array_line[21])) // field 21 = watts PV input?
         {
             $watts = $array_line[21];
@@ -170,6 +195,8 @@ foreach ($array_files_show as $key => $value)
             if(empty($watts)) $watts = "0"; // if value was 0000 it would be empty now so assign minimum value
             // search all elements of this array // replace by nothing  // in this string
             $chart_data_string_solar_input_watts = $chart_data_string_solar_input_watts.$watts.", ";
+
+            $stats_kWh_produced = $stats_kWh_produced + ($watts * $time_diff_h); // calc kWh
         }
     }
 }
@@ -193,6 +220,8 @@ $chart_data_string_solar_input_watts = $chart_data_string_solar_input_watts."]";
 $chart_data_string_consumed_watts = $chart_data_string_consumed_watts."]";
 $chart_data_string_batt_volt = $chart_data_string_batt_volt."]";
 
+$stats_kWh_produced = number_format((float)$stats_kWh_produced, 3, '.', '');
+$stats_kWh_consumed = number_format((float)$stats_kWh_consumed, 3, '.', '');
 
 /* manual modifications
 
@@ -238,8 +267,11 @@ const data = [
   </style>
 </head>
 <body>
-	<div id="border1" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%;">
-    	<div id="border2" style="position: relative; float: left; min-width: 100%;">
+	<div id="frame1" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%;">
+    	<div id="frame2" style="position: relative; float: left; min-width: 100%;">
+    		<?php echo "daily stats: ".$stats_kWh_produced." kWh produced, ".$stats_kWh_consumed." kWh consumed"; ?>
+    	</div>
+    	<div id="frame3" style="position: relative; float: left; min-width: 100%;">
     		<form class="form" action="index.php" method="post"><button name="button" value="ShowAll" type="submit" class="btn btn-primary">ShowAll</button></form>
     		<?php
     		foreach ($array_files_all as $key => $value)
@@ -253,13 +285,13 @@ const data = [
 	<canvas id="myChart" width="2048" height="1024" style="background-color: #444;"></canvas>
 
   <script>
-// Data
-const data = [
-<?php echo $chart_data_string_date.",\n"; ?>
-<?php echo $chart_data_string_consumed_watts.",\n"; ?>
-<?php echo $chart_data_string_solar_input_watts.",\n"; ?>
-<?php echo $chart_data_string_batt_volt.",\n"; ?>
-];
+    // Data
+    const data = [
+    <?php echo $chart_data_string_date.",\n"; ?>
+    <?php echo $chart_data_string_consumed_watts.",\n"; ?>
+    <?php echo $chart_data_string_solar_input_watts.",\n"; ?>
+    <?php echo $chart_data_string_batt_volt.",\n"; ?>
+    ];
 
     // Extract x and y coordinates from the data
     const xValues = data[0];
@@ -327,18 +359,24 @@ const data = [
         ]
       },
       options: {
-        scales: {
-          xAxes: [{
-            type: 'linear',
-            position: 'bottom'
-          }],
-          yAxes: [{
-            ticks: {
-              min: 0,
-            }
-          }]
-        }
-      }
+    	  scales: {
+    	    xAxes: [{
+    	      type: 'linear',
+    	      position: 'bottom'
+    	    }],
+    	    yAxes: [{
+    	      ticks: {
+    	        min: 0,
+    	      }
+    	    }]
+    	  },
+    	  elements: {
+    	    line: {
+				cubicInterpolationMode: 'monotone',
+				tension: 0.8, // level of interpolation (between 0 and 1)
+    	    }
+    	  }
+    	}
     });
   </script>
   </div>
