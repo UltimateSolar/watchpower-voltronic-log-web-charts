@@ -263,7 +263,23 @@ const data = [
     width: 100%;
     height: 100%;
   }
-  
+ 
+ /* link like button styling */ 
+a:link, a:visited .link_button {
+  background-color: white;
+  color: black;
+  border: 2px solid orange;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+}
+
+a:hover, a:active .link_button
+{
+  background-color: orange;
+  color: white;
+}
   </style>
 </head>
 <body>
@@ -272,12 +288,16 @@ const data = [
     		<?php echo "daily stats: ".$stats_kWh_produced." kWh produced, ".$stats_kWh_consumed." kWh consumed"; ?>
     	</div>
     	<div id="frame3" style="position: relative; float: left; min-width: 100%;">
-    		<form class="form" action="index.php" method="post"><button name="button" value="ShowAll" type="submit" class="btn btn-primary">ShowAll</button></form>
+    		<!-- <form class="form" action="index.php" method="post"><button name="button" value="ShowAll" type="submit" class="btn btn-primary">ShowAll</button></form>  -->
+    		<a class="link_button" href="./index.php?button=ShowAll">ShowAll</a>
     		<?php
     		foreach ($array_files_all as $key => $value)
     		{
     		    $array_filename_segments = explode(" ", $value);
-    		    echo '<form class="form" action="index.php" method="post"><button name="button" value="'.$array_filename_segments[0].'" type="submit" class="btn btn-primary">'.$array_filename_segments[0].'</button></form>';
+    		    // work with form buttons
+    		    // echo '<form class="form" action="index.php" method="post"><button name="button" value="'.$array_filename_segments[0].'" type="submit" class="btn btn-primary">'.$array_filename_segments[0].'</button></form>';
+    		    // work with links
+    		    echo '<a class="link_button" href="./index.php?button='.$array_filename_segments[0].'">'.$array_filename_segments[0].'</a>';
     		}
     		?>
     	</div>
