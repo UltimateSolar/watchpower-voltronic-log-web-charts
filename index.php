@@ -364,18 +364,22 @@ const data = [
     	      type: 'linear',
     	      position: 'bottom'
     	    }],
+    	    /*
     	    yAxes: [{
     	      ticks: {
     	        min: 0,
     	      }
     	    }]
+    	    */
     	  },
+    	  /* does not look better with many datapoints while slowing down render performance 
     	  elements: {
     	    line: {
 				cubicInterpolationMode: 'monotone',
 				tension: 0.8, // level of interpolation (between 0 and 1)
     	    }
     	  }
+    	  */
     	}
     });
   </script>
