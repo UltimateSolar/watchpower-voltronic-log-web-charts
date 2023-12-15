@@ -1,6 +1,6 @@
 # watchpower-voltronic-log-web-charts v1.4
 
-![Screenshot](./watchpower-voltronic-log-web-charts%20.png?raw=true "Screenshot")
+![Screenshot](./watchpower-voltronic-log-web-charts v1.4.png")
 
 IT WORKS BUT FAR FROM FINISHED :D
 
