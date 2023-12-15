@@ -1,6 +1,6 @@
 # watchpower-voltronic-log-web-charts v1.4
 
-[![screenshot]([https://github.com/altercation/solarized/raw/master/img/solarized-yinyang.png](https://raw.githubusercontent.com/UltimateSolar/watchpower-voltronic-log-web-charts/main/watchpower-voltronic-log-web-charts%20v1.4.png))](#screenshot)
+![Screenshot](./watchpower-voltronic-log-web-charts%20v1.4.png?raw=true "Screenshot")
 
 IT WORKS BUT FAR FROM FINISHED :D
 
