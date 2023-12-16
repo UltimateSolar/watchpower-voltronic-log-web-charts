@@ -33,7 +33,7 @@ if($handle = opendir($path2data))
 
         if(end($array_filename_segments) == "log") // if file ending is log proeed
         {
-            if(str_contains($filename, "USB-QPIGS"))
+            if(str_contains($filename, " USB-QPIGS.log"))
             {
                 array_push($array_files,$filename);
             }
