@@ -1,7 +1,7 @@
 <?php
 date_default_timezone_set('CET'); // modify if not Europe/Berlin
 
-$title = "=== watchpower-voltronic-log-web-charts v1.2 ===";
+$title = "=== watchpower-voltronic-log-web-charts v1.5 ===";
 /* what is it?
  * nice graphical web view of voltronic-masterpower-watchpower output logs
  * requirements:
