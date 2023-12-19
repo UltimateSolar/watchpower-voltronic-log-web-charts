@@ -18,6 +18,9 @@ $title = "=== watchpower-voltronic-log-web-charts v1.2 ===";
 $input_show = "ShowAll"; // holds the date to show 2023-12-12 or ShowAll (all dates from all logs = can be A LOT OF DATAPOINTS (like millions) = heavy on CPU client side js)
 $input_skip = 5; // show every nth datapoint (if too much data in the logs (millions of recrods)
 
+$refresh_auto = 5*60; // refresh automatically with same parameter every 5min
+$parameter_last = "";
+
 // iterate over all files in the ./data directory
 $array_files = array();
 
@@ -49,6 +52,7 @@ $order = array();
 if(isset($_REQUEST["button"]))
 {
     $input_show = htmlspecialchars($_REQUEST["button"]);
+    $parameter_last = $input_show; // auto refresh with same parameter
 }
 
 $target = count($array_files);
@@ -167,7 +171,14 @@ foreach ($array_files_show as $key => $value)
         // calc time difference since last datapoint, it is assumed that wattage stayed the same in this period
         if(isset($array_stats[$i-1])) // if there is no such element in the array this means the array is empty and currently processing the first element
         {
-            $time_diff_ms = $array_stats[$i]["timestamp"] - $array_stats[$i-1]["timestamp"];
+            if(!isset($array_stats[$i]["timestamp"]))
+            {
+                $time_diff_ms = 0;
+            }
+            else
+            {
+                $time_diff_ms = $array_stats[$i]["timestamp"] - $array_stats[$i-1]["timestamp"];
+            }
         }
         else
         {
@@ -255,6 +266,7 @@ const data = [
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta http-equiv="refresh" content="<?php echo $refresh_auto.";URL=index.php?".$parameter_last; ?>"/>
   <title><?php echo $title; ?></title>
   <!-- Include Chart.js library -->
   <script src="js/chart.js"></script>
