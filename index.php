@@ -69,6 +69,10 @@ if($input_show == "ShowAll")
 {
     $array_files_show = $array_files; // show all
 }
+if($input_show == "latest")
+{
+    array_push($array_files_show,end($array_files)); // show all
+}
 else // it will be a date
 {
     foreach ($array_files as $key => $value)
@@ -300,6 +304,7 @@ a:hover, a:active .link_button
     		    echo '<a class="link_button" href="./index.php?button='.$array_filename_segments[0].'">'.$array_filename_segments[0].'</a>';
     		}
     		?>
+    		<a class="link_button" href="./index.php?button=latest">latest</a>
     	</div>
     <!-- Create a canvas element to render the chart -->
 	<canvas id="myChart" width="2048" height="1024" style="background-color: #444;"></canvas>
