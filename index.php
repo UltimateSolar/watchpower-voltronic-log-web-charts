@@ -52,7 +52,7 @@ $order = array();
 if(isset($_REQUEST["button"]))
 {
     $input_show = htmlspecialchars($_REQUEST["button"]);
-    $parameter_last = $input_show; // auto refresh with same parameter
+    $parameter_last = "button=".$input_show; // auto refresh with same parameter
 }
 
 $target = count($array_files);
