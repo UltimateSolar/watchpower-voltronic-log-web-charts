@@ -19,7 +19,13 @@ $input_show = "ShowAll"; // holds the date to show 2023-12-12 or ShowAll (all da
 $input_skip = 5; // show every nth datapoint (if too much data in the logs (millions of recrods)
 
 $refresh_auto = 5*60; // refresh automatically with same parameter every 5min
-$parameter_last = "";
+$parameter_last = ""; // save last used parameter for to refresh with the same parameters
+$auto_reload_string = "on"; // default
+
+if(isset($_COOKIE['auto_reload_string']))
+{
+    $auto_reload_string = json_decode($_COOKIE['auto_reload_string'], true);
+}
 
 // iterate over all files in the ./data directory
 $array_files = array();
@@ -52,6 +58,8 @@ $order = array();
 if(isset($_REQUEST["button"]))
 {
     $input_show = htmlspecialchars($_REQUEST["button"]);
+    if(isset($_REQUEST["auto_reload"])) $auto_reload_string = htmlspecialchars($_REQUEST["auto_reload"]);
+    setcookie('auto_reload_string', json_encode("on"), time()+99999);
     $parameter_last = "button=".$input_show; // auto refresh with same parameter
 }
 
@@ -73,7 +81,7 @@ if($input_show == "ShowAll")
 {
     $array_files_show = $array_files; // show all
 }
-if($input_show == "latest")
+else if($input_show == "today")
 {
     array_push($array_files_show,end($array_files)); // show all
 }
@@ -266,7 +274,7 @@ const data = [
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <meta http-equiv="refresh" content="<?php echo $refresh_auto.";URL=index.php?".$parameter_last; ?>"/>
+   <meta http-equiv="refresh" content="<?php if($auto_reload_string == "on"){ echo $refresh_auto.";URL=index.php?".$parameter_last; } ?>"/>
   <title><?php echo $title; ?></title>
   <!-- Include Chart.js library -->
   <script src="js/chart.js"></script>
@@ -296,28 +304,50 @@ a:hover, a:active .link_button
   background-color: orange;
   color: white;
 }
+#button_disabled {
+  background-color: red;
+  color: white;
+  border: 2px solid orange;
+}
+#button_enabled {
+  background-color: green;
+  color: white;
+  border: 2px solid orange;
+}
   </style>
 </head>
 <body>
 	<div id="frame1" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%;">
     	<div id="frame2" style="position: relative; float: left; min-width: 100%;">
-    		<?php echo "daily stats: ".$stats_kWh_produced." kWh produced, ".$stats_kWh_consumed." kWh consumed"; ?>
+    		<?php echo "stats for selected dates: ".$stats_kWh_produced." kWh produced, ".$stats_kWh_consumed." kWh consumed"; ?>
     	</div>
     	<div id="frame3" style="position: relative; float: left; min-width: 100%;">
     		<!-- <form class="form" action="index.php" method="post"><button name="button" value="ShowAll" type="submit" class="btn btn-primary">ShowAll</button></form>  -->
     		<a class="link_button" href="./index.php?button=ShowAll">ShowAll</a>
     		<?php
-    		foreach ($array_files_all as $key => $value)
+    		$target = count($array_files_all);
+    		$target = $target - 1; // do not show last button, as "today" is last button
+    		for($i=0;$i<$target;$i++)
     		{
-    		    $array_filename_segments = explode(" ", $value);
+    		    $array_filename_segments = explode(" ", $array_files_all[0]);
     		    // work with form buttons
     		    // echo '<form class="form" action="index.php" method="post"><button name="button" value="'.$array_filename_segments[0].'" type="submit" class="btn btn-primary">'.$array_filename_segments[0].'</button></form>';
     		    // work with links
     		    echo '<a class="link_button" href="./index.php?button='.$array_filename_segments[0].'">'.$array_filename_segments[0].'</a>';
     		}
     		?>
-    		<a class="link_button" href="./index.php?button=latest">latest</a>
-    	</div>
+			<a class="link_button" href="./index.php?button=today">today</a>
+			<?php
+                if($auto_reload_string == "on")
+                {
+                    echo '<a id="button_disabled" class="link_button" href="./index.php?'.$parameter_last.'&auto_reload=off">auto_reload_on</a>';
+                } else
+                {
+			         echo '<a id="button_enabled" class="link_button" href="./index.php?'.$parameter_last.'&auto_reload=on">auto_reload_off</a>';
+                }
+			?>
+
+		</div>
     <!-- Create a canvas element to render the chart -->
 	<canvas id="myChart" width="2048" height="1024" style="background-color: #444;"></canvas>
 
