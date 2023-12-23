@@ -14,23 +14,25 @@ $title = "=== watchpower-voltronic-log-web-charts v1.5 ===";
  *  :D
  */
 
-// defaults
-$input_show = "ShowAll"; // holds the date to show 2023-12-12 or ShowAll (all dates from all logs = can be A LOT OF DATAPOINTS (like millions) = heavy on CPU client side js)
+// startup defaults, can be modified by user
+$path2data = "./data";
 $input_skip = 5; // show every nth datapoint (if too much data in the logs (millions of recrods)
 
 $refresh_auto = 5*60; // refresh automatically with same parameter every 5min
-$parameter_last = ""; // save last used parameter for to refresh with the same parameters
 $auto_reload_string = "on"; // default
+
+// startup defaults not to be modified by user
+$parameter_last = ""; // save last used parameter for to refresh with the same parameters
+$input_show = "ShowAll"; // holds the date to show 2023-12-12 or ShowAll (all dates from all logs = can be A LOT OF DATAPOINTS (like millions) = heavy on CPU client side js)
+
+// iterate over all files in the ./data directory
+$array_files = array();
+$array_files_show = Array();
 
 if(isset($_COOKIE['auto_reload_string']))
 {
     $auto_reload_string = json_decode($_COOKIE['auto_reload_string'], true);
 }
-
-// iterate over all files in the ./data directory
-$array_files = array();
-
-$path2data = "./data";
 if($handle = opendir($path2data))
 {
     while (false !== ($filename = readdir($handle)))
@@ -74,8 +76,6 @@ for($i=0;$i<$target;$i++)
 
 array_multisort($order, SORT_ASC, $array_files); // does the sorting
 
-$array_files_all = $array_files; // backup copy to generate buttons
-$array_files_show = Array();
 
 if($input_show == "ShowAll")
 {
@@ -325,11 +325,11 @@ a:hover, a:active .link_button
     		<!-- <form class="form" action="index.php" method="post"><button name="button" value="ShowAll" type="submit" class="btn btn-primary">ShowAll</button></form>  -->
     		<a class="link_button" href="./index.php?button=ShowAll">ShowAll</a>
     		<?php
-    		$target = count($array_files_all);
+    		$target = count($array_files);
     		$target = $target - 1; // do not show last button, as "today" is last button
     		for($i=0;$i<$target;$i++)
     		{
-    		    $array_filename_segments = explode(" ", $array_files_all[0]);
+    		    $array_filename_segments = explode(" ", $array_files[$i]);
     		    // work with form buttons
     		    // echo '<form class="form" action="index.php" method="post"><button name="button" value="'.$array_filename_segments[0].'" type="submit" class="btn btn-primary">'.$array_filename_segments[0].'</button></form>';
     		    // work with links
