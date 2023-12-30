@@ -1,7 +1,7 @@
 <?php
 date_default_timezone_set('CET'); // modify if not Europe/Berlin
 
-$title = "=== watchpower-voltronic-log-web-charts v1.5 ===";
+$title = "=== watchpower-voltronic-log-web-charts v1.6 ===";
 /* what is it?
  * nice graphical web view of voltronic-masterpower-watchpower output logs
  * requirements:
@@ -21,9 +21,23 @@ $input_skip = 5; // show every nth datapoint (if too much data in the logs (mill
 $refresh_auto = 5*60; // refresh automatically with same parameter every 5min
 $auto_reload_string = "on"; // default
 
+$watts_used_by_inverter = 50; // how much Watts the inverter itself needs to run (is not per default in the "used kWh" stats)
+$stats_kWh_used_by_inverter = 0;
+
 // startup defaults not to be modified by user
 $parameter_last = ""; // save last used parameter for to refresh with the same parameters
 $input_show = "ShowAll"; // holds the date to show 2023-12-12 or ShowAll (all dates from all logs = can be A LOT OF DATAPOINTS (like millions) = heavy on CPU client side js)
+
+$array_stats = array(); // hold all timestamps with same index positions as in $lines_less
+$stats_kWh_produced = 0;
+$stats_kWh_used = 0;
+
+/* hold the data */
+$chart_data_string = "";
+$chart_data_string_date = "[";
+$chart_data_string_solar_input_watts = "[";
+$chart_data_string_used_watts = "[";
+$chart_data_string_batt_volt = "[";
 
 // iterate over all files in the ./data directory
 $array_files = array();
@@ -32,6 +46,10 @@ $array_files_show = Array();
 if(isset($_COOKIE['auto_reload_string']))
 {
     $auto_reload_string = json_decode($_COOKIE['auto_reload_string'], true);
+}
+if(isset($_COOKIE['watts_used_by_inverter']))
+{
+    $watts_used_by_inverter = json_decode($_COOKIE['watts_used_by_inverter'], true);
 }
 if($handle = opendir($path2data))
 {
@@ -62,7 +80,14 @@ if(isset($_REQUEST["button"]))
     $input_show = htmlspecialchars($_REQUEST["button"]);
     if(isset($_REQUEST["auto_reload"])) $auto_reload_string = htmlspecialchars($_REQUEST["auto_reload"]);
     setcookie('auto_reload_string', json_encode("on"), time()+99999);
-    $parameter_last = "button=".$input_show; // auto refresh with same parameter
+    $parameter_last = $input_show; // auto refresh with same parameter
+}
+
+if(isset($_REQUEST["watts_used_by_inverter"]))
+{
+    $watts_used_by_inverter = $_REQUEST["watts_used_by_inverter"];
+    setcookie('watts_used_by_inverter', json_encode($watts_used_by_inverter), time()+99999);
+    $parameter_last = $input_show; // auto refresh with same parameter
 }
 
 $target = count($array_files);
@@ -97,17 +122,6 @@ else // it will be a date
     }
 }
 
-$array_stats = array(); // hold all timestamps with same index positions as in $lines_less
-$stats_kWh_produced = 0;
-$stats_kWh_consumed = 0;
-
-
-/* hold the data */
-$chart_data_string = "";
-$chart_data_string_date = "[";
-$chart_data_string_solar_input_watts = "[";
-$chart_data_string_consumed_watts = "[";
-$chart_data_string_batt_volt = "[";
 
 // iterate over all lines and extract values
 foreach ($array_files_show as $key => $value)
@@ -195,15 +209,16 @@ foreach ($array_files_show as $key => $value)
         
         $time_diff_h = $time_diff_ms / 3600000;
 
-        if(isset($array_line[7])) // field 7 = watts_consumed?
+        if(isset($array_line[7])) // field 7 = watts_used?
         {
             $watts = $array_line[7];
             $watts = ltrim($watts, '0'); // delete all leading 000123
             if(empty($watts)) $watts = "0"; // if value was 0000 it would be empty now so assign minimum value
             // search all elements of this array // replace by nothing  // in this string
-            $chart_data_string_consumed_watts = $chart_data_string_consumed_watts.$watts.", ";
+            $chart_data_string_used_watts = $chart_data_string_used_watts.$watts.", ";
             
-            $stats_kWh_consumed = $stats_kWh_consumed + ($watts * $time_diff_h); // calc kWh
+            $stats_kWh_used = $stats_kWh_used + ($watts * $time_diff_h); // calc kWh
+            $stats_kWh_used_by_inverter = $stats_kWh_used_by_inverter + ($watts_used_by_inverter * $time_diff_h); // calc kWh
         }
         
         if(isset($array_line[10])) // field 10 = batt voltage
@@ -228,8 +243,8 @@ foreach ($array_files_show as $key => $value)
 $chart_data_string_date = substr($chart_data_string_date, 0, -1);
 $chart_data_string_date = substr($chart_data_string_date, 0, -1);
 
-$chart_data_string_consumed_watts = substr($chart_data_string_consumed_watts, 0, -1);
-$chart_data_string_consumed_watts = substr($chart_data_string_consumed_watts, 0, -1);
+$chart_data_string_used_watts = substr($chart_data_string_used_watts, 0, -1);
+$chart_data_string_used_watts = substr($chart_data_string_used_watts, 0, -1);
 
 $chart_data_string_solar_input_watts = substr($chart_data_string_solar_input_watts, 0, -1);
 $chart_data_string_solar_input_watts = substr($chart_data_string_solar_input_watts, 0, -1);
@@ -240,11 +255,12 @@ $chart_data_string_batt_volt = substr($chart_data_string_batt_volt, 0, -1);
 // close the braket
 $chart_data_string_date = $chart_data_string_date."]";
 $chart_data_string_solar_input_watts = $chart_data_string_solar_input_watts."]";
-$chart_data_string_consumed_watts = $chart_data_string_consumed_watts."]";
+$chart_data_string_used_watts = $chart_data_string_used_watts."]";
 $chart_data_string_batt_volt = $chart_data_string_batt_volt."]";
 
 $stats_kWh_produced = number_format((float)$stats_kWh_produced, 3, '.', '');
-$stats_kWh_consumed = number_format((float)$stats_kWh_consumed, 3, '.', '');
+$stats_kWh_used = number_format((float)$stats_kWh_used, 3, '.', '');
+$stats_kWh_used_by_inverter = number_format((float)$stats_kWh_used_by_inverter, 3, '.', '');
 
 /* manual modifications
 
@@ -254,7 +270,7 @@ $stats_kWh_consumed = number_format((float)$stats_kWh_consumed, 3, '.', '');
 // Data
 const data = [
 <?php echo $chart_data_string_date.","; ?>
-<?php echo $chart_data_string_consumed_watts; ?>
+<?php echo $chart_data_string_used_watts; ?>
 <?php echo $chart_data_string_solar_input_watts; ?>
 ];
 
@@ -274,7 +290,7 @@ const data = [
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <meta http-equiv="refresh" content="<?php if($auto_reload_string == "on"){ echo $refresh_auto.";URL=index.php?".$parameter_last; } ?>"/>
+   <meta http-equiv="refresh" content="<?php if($auto_reload_string == "on"){ echo $refresh_auto.";URL=index.php?button=".$parameter_last; } ?>"/>
   <title><?php echo $title; ?></title>
   <!-- Include Chart.js library -->
   <script src="js/chart.js"></script>
@@ -319,7 +335,13 @@ a:hover, a:active .link_button
 <body>
 	<div id="frame1" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%;">
     	<div id="frame2" style="position: relative; float: left; min-width: 100%;">
-    		<?php echo "stats for selected dates: ".$stats_kWh_produced." kWh produced, ".$stats_kWh_consumed." kWh consumed"; ?>
+    		<?php echo "stats for selected dates: ".$stats_kWh_produced." kWh produced, ".$stats_kWh_used." kWh used by AC Out, inverter used: ".$stats_kWh_used_by_inverter." kWh "; ?>
+            <form action="./index.php">
+                <label>how much watts does the inverter use?</label>
+                <input type="number" id="watts_used_by_inverter" name="watts_used_by_inverter" min="0" value="<?php echo $watts_used_by_inverter; ?>" style="width: 50px;">W
+                <input id="button" name="button" value="<?php echo $parameter_last; ?>" type="hidden"></input>
+                <button type="submit">set</button>
+            </form>
     	</div>
     	<div id="frame3" style="position: relative; float: left; min-width: 100%;">
     		<!-- <form class="form" action="index.php" method="post"><button name="button" value="ShowAll" type="submit" class="btn btn-primary">ShowAll</button></form>  -->
@@ -356,7 +378,7 @@ a:hover, a:active .link_button
     const data = [
     <?php echo $chart_data_string_date.",\n"; ?>
     <?php echo $chart_data_string_solar_input_watts.",\n"; ?>
-    <?php echo $chart_data_string_consumed_watts.",\n"; ?>
+    <?php echo $chart_data_string_used_watts.",\n"; ?>
     <?php echo $chart_data_string_batt_volt.",\n"; ?>
     ];
 
@@ -376,8 +398,10 @@ a:hover, a:active .link_button
       const day = date.getDate().toString().padStart(2, '0');
       const hours = date.getHours().toString().padStart(2, '0');
       const minutes = date.getMinutes().toString().padStart(2, '0');
-      const seconds = date.getSeconds().toString().padStart(2, '0');
-      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      // if user wants with seconds uncomment next 2 lines
+      // const seconds = date.getSeconds().toString().padStart(2, '0');
+      // return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      return `${year}-${month}-${day} ${hours}:${minutes}`;
     };
 
     // Get the canvas element
@@ -398,7 +422,7 @@ a:hover, a:active .link_button
             pointBackgroundColor: '#c27e00', /* orange */
           },
           {
-            label: 'Out AC Watt consumed',
+            label: 'Out AC Watt used',
             data: yValues2,
             borderColor: 'red', /* 'rgba(255, 99, 132, 1)' */
             borderWidth: 2,
