@@ -362,10 +362,10 @@ a:hover, a:active .link_button
 			<?php
                 if($auto_reload_string == "on")
                 {
-                    echo '<a id="button_enabled" class="link_button" href="./index.php?'.$parameter_last.'&auto_reload=off">auto_reload_on</a>';
+                    echo '<a id="button_enabled" class="link_button" href="./index.php?button='.$parameter_last.'&auto_reload=off">auto_reload_on</a>';
                 } else
                 {
-			         echo '<a id="button_disabled" class="link_button" href="./index.php?'.$parameter_last.'&auto_reload=on">auto_reload_off</a>';
+			         echo '<a id="button_disabled" class="link_button" href="./index.php?button='.$parameter_last.'&auto_reload=on">auto_reload_off</a>';
                 }
 			?>
 
