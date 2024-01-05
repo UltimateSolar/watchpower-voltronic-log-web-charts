@@ -85,8 +85,12 @@ for($i=0;$i<$target;$i++)
 {
     $filename = $array_files[$i];
     $array_filename_segments = explode(" ", $filename);
-    $array_files[$i] = $array_filename_segments[0]; // changes "2023-10-30 USB-QPIGS.log" to simply "2023-10-30" otherwise no sort possible
-    $order[] = strtotime($array_filename_segments[0]);
+    $logfile_date_string = $array_filename_segments[0];
+    $logfile_date_string = str_replace("_","-",$logfile_date_string);
+    $array_files[$i] = $logfile_date_string; // changes "2023-10-30 USB-QPIGS.log" to simply "2023-10-30" otherwise no sort possible
+    
+    $logfile_date = date( 'Y-m-d', strtotime( $logfile_date_string ) );
+    $order[] = strtotime($logfile_date);
 }
 
 array_multisort($order, SORT_ASC, $array_files); // does the sorting
