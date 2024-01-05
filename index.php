@@ -1,7 +1,7 @@
 <?php
 date_default_timezone_set('CET'); // modify if not Europe/Berlin
 
-$title = "=== watchpower-voltronic-log-web-charts v1.6 ===";
+$title = "=== watchpower-voltronic-log-web-charts v1.7 ===";
 /* what is it?
  * nice graphical web view of voltronic-masterpower-watchpower output logs
  * requirements:
@@ -14,17 +14,17 @@ $title = "=== watchpower-voltronic-log-web-charts v1.6 ===";
  *  :D
  */
 
-// startup defaults, can be modified by user
+// === config === please: user modify
 $path2data = "./data";
 $input_skip = 5; // show every nth datapoint (if too much data in the logs (millions of recrods)
 
 $refresh_auto = 5*60; // refresh automatically with same parameter every 5min
 $auto_reload_string = "on"; // default
 
-$watts_used_by_inverter = 50; // how much Watts the inverter itself needs to run (is not per default in the "used kWh" stats)
+$watts_used_by_inverter = 50; // how much Watts the inverter itself uses to keep itself operational (especially in winter times of low light energy this value matters)
 $stats_kWh_used_by_inverter = 0;
 
-// startup defaults not to be modified by user
+// === startup defaults values === DO NOT modify
 $parameter_last = ""; // save last used parameter for to refresh with the same parameters
 $input_show = "ShowAll"; // holds the date to show 2023-12-12 or ShowAll (all dates from all logs = can be A LOT OF DATAPOINTS (like millions) = heavy on CPU client side js)
 
@@ -33,7 +33,6 @@ $stats_kWh_produced = 0;
 $stats_kWh_used = 0;
 
 /* hold the data */
-$chart_data_string = "";
 $chart_data_string_date = "[";
 $chart_data_string_solar_input_watts = "[";
 $chart_data_string_used_watts = "[";
@@ -46,10 +45,6 @@ $array_files_show = Array();
 if(isset($_COOKIE['auto_reload_string']))
 {
     $auto_reload_string = json_decode($_COOKIE['auto_reload_string'], true);
-}
-if(isset($_COOKIE['watts_used_by_inverter']))
-{
-    $watts_used_by_inverter = json_decode($_COOKIE['watts_used_by_inverter'], true);
 }
 if($handle = opendir($path2data))
 {
@@ -80,13 +75,6 @@ if(isset($_REQUEST["button"]))
     $input_show = htmlspecialchars($_REQUEST["button"]);
     if(isset($_REQUEST["auto_reload"])) $auto_reload_string = htmlspecialchars($_REQUEST["auto_reload"]);
     setcookie('auto_reload_string', json_encode("on"), time()+99999);
-    $parameter_last = $input_show; // auto refresh with same parameter
-}
-
-if(isset($_REQUEST["watts_used_by_inverter"]))
-{
-    $watts_used_by_inverter = $_REQUEST["watts_used_by_inverter"];
-    setcookie('watts_used_by_inverter', json_encode($watts_used_by_inverter), time()+99999);
     $parameter_last = $input_show; // auto refresh with same parameter
 }
 
@@ -336,12 +324,6 @@ a:hover, a:active .link_button
 	<div id="frame1" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%;">
     	<div id="frame2" style="position: relative; float: left; min-width: 100%;">
     		<?php echo "stats for selected dates: ".$stats_kWh_produced." kWh produced, ".$stats_kWh_used." kWh used by AC Out, inverter used: ".$stats_kWh_used_by_inverter." kWh "; ?>
-            <form action="./index.php">
-                <label>how much watts does the inverter use?</label>
-                <input type="number" id="watts_used_by_inverter" name="watts_used_by_inverter" min="0" value="<?php echo $watts_used_by_inverter; ?>" style="width: 50px;">W
-                <input id="button" name="button" value="<?php echo $parameter_last; ?>" type="hidden"></input>
-                <button type="submit">set</button>
-            </form>
     	</div>
     	<div id="frame3" style="position: relative; float: left; min-width: 100%;">
     		<!-- <form class="form" action="index.php" method="post"><button name="button" value="ShowAll" type="submit" class="btn btn-primary">ShowAll</button></form>  -->
