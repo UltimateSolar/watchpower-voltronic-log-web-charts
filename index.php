@@ -182,7 +182,7 @@ foreach ($array_files_show as $key => $value)
             }
             else
             {
-                $what_is_going_on = $array_line[0];
+                $what_is_going_on = $array_line[0]; // for debugging purposes only :D
             }
         }
         
