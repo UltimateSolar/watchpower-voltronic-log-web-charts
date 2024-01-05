@@ -1,7 +1,8 @@
 <?php
-date_default_timezone_set('CET'); // modify if not Europe/Berlin
 
+date_default_timezone_set('CET'); // modify if not Europe/Berlin
 $title = "=== watchpower-voltronic-log-web-charts v1.7 ===";
+
 /* what is it?
  * nice graphical web view of voltronic-masterpower-watchpower output logs
  * requirements:
@@ -15,6 +16,7 @@ $title = "=== watchpower-voltronic-log-web-charts v1.7 ===";
  */
 
 // === config === please: user modify
+
 $path2data = "./data";
 $input_skip = 5; // show every nth datapoint (if too much data in the logs (millions of recrods)
 
@@ -55,7 +57,7 @@ if($handle = opendir($path2data))
         // do something with the file
         $array_filename_segments = explode('.',$filename);
 
-        if(end($array_filename_segments) == "log") // if file ending is log proeed
+        if(end($array_filename_segments) == "log") // if file ending is log proceed
         {
             if(str_contains($filename, " USB-QPIGS.log"))
             {
