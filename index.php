@@ -84,7 +84,7 @@ $target = count($array_files);
 for($i=0;$i<$target;$i++)
 {
     $filename = $array_files[$i];
-    $array_filename_segments = (explode(" ", $filename));
+    $array_filename_segments = explode(" ", $filename);
     $array_files[$i] = $array_filename_segments[0]; // changes "2023-10-30 USB-QPIGS.log" to simply "2023-10-30" otherwise no sort possible
     $order[] = strtotime($array_filename_segments[0]);
 }
