@@ -148,6 +148,8 @@ foreach ($array_files_show as $key => $value)
         $line = trim($line, " \v.");
         $line = trim($line, " \x00.");
         
+        if(empty($line)) continue; // if line is empty, skip it
+        
         $line = htmlspecialchars($line); // escape potential malicious input
         $line = str_replace("[", "",$line); // remove all [
         $line = str_replace("]", "",$line); // remove all ]
