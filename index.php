@@ -20,7 +20,7 @@ $title = "=== watchpower-voltronic-log-web-charts v1.7 ===";
 $path2data = "./data";
 $input_skip = 5; // show every nth datapoint (if too much data in the logs (millions of recrods)
 
-$refresh_auto = 5*60; // refresh automatically with same parameter every 5min
+$refresh_auto = 5; // refresh automatically with same parameter every 5min
 $auto_reload_string = "on"; // default
 
 $watts_used_by_inverter = 50; // how much Watts the inverter itself uses to keep itself operational (especially in winter times of low light energy this value matters)
@@ -286,7 +286,7 @@ const data = [
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <meta http-equiv="refresh" content="<?php if($auto_reload_string == "on"){ echo $refresh_auto.";URL=index.php?button=".$parameter_last; } ?>"/>
+   <meta http-equiv="refresh" content="<?php if($auto_reload_string == "on"){ echo ($refresh_auto*60).";URL=index.php?button=".$parameter_last; } ?>"/>
   <title><?php echo $title; ?></title>
   <!-- Include Chart.js library -->
   <script src="js/chart.js"></script>
@@ -352,10 +352,10 @@ a:hover, a:active .link_button
 			<?php
                 if($auto_reload_string == "on")
                 {
-                    echo '<a id="button_enabled" class="link_button" href="./index.php?button='.$parameter_last.'&auto_reload=off">auto_reload_on</a>';
+                    echo '<a title="turn auto reload every '.$refresh_auto.'min on or off" id="button_enabled" class="link_button" href="./index.php?button='.$parameter_last.'&auto_reload=off">auto_reload_on</a>';
                 } else
                 {
-			         echo '<a id="button_disabled" class="link_button" href="./index.php?button='.$parameter_last.'&auto_reload=on">auto_reload_off</a>';
+			         echo '<a title="turn auto reload every '.$refresh_auto.'min on or off" id="button_disabled" class="link_button" href="./index.php?button='.$parameter_last.'&auto_reload=on">auto_reload_off</a>';
                 }
 			?>
 
