@@ -290,52 +290,16 @@ const data = [
   <title><?php echo $title; ?></title>
   <!-- Include Chart.js library -->
   <script src="js/chart.js"></script>
-  <style>
-  .form {
-    position: relative;
-    float: left;
-  }
-  body, html {
-    width: 100%;
-    height: 100%;
-  }
- 
- /* link like button styling */ 
-a:link, a:visited .link_button {
-  background-color: white;
-  color: black;
-  border: 2px solid orange;
-  padding: 3px 5px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-}
-
-a:hover, a:active .link_button
-{
-  background-color: orange;
-  color: white;
-}
-#button_disabled {
-  background-color: red;
-  color: white;
-  border: 2px solid orange;
-}
-#button_enabled {
-  background-color: green;
-  color: white;
-  border: 2px solid orange;
-}
-  </style>
+  <link rel="stylesheet" type="text/css" href="./css/style.css">
 </head>
 <body>
-	<div id="frame1" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%;">
-    	<div id="frame2" style="position: relative; float: left; min-width: 100%;">
+	<div id="div1" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%;">
+    	<div id="div2" style="position: relative; float: left; min-width: 100%;">
     		<?php echo "stats for selected dates: ".$stats_kWh_produced." kWh produced, ".$stats_kWh_used." kWh used by AC Out, inverter used: ".$stats_kWh_used_by_inverter." kWh "; ?>
     	</div>
-    	<div id="frame3" style="position: relative; float: left; min-width: 100%;">
+    	<div id="div3" style="position: relative; float: left; min-width: 100%;">
     		<!-- <form class="form" action="index.php" method="post"><button name="button" value="ShowAll" type="submit" class="btn btn-primary">ShowAll</button></form>  -->
-    		<a class="link_button" href="./index.php?button=ShowAll">ShowAll</a>
+    		<a class="link_button_orange" href="./index.php?button=ShowAll">ShowAll</a>
     		<?php
     		$target = count($array_files);
     		$target = $target - 1; // do not show last button, as "today" is last button
@@ -345,17 +309,17 @@ a:hover, a:active .link_button
     		    // work with form buttons
     		    // echo '<form class="form" action="index.php" method="post"><button name="button" value="'.$array_filename_segments[0].'" type="submit" class="btn btn-primary">'.$array_filename_segments[0].'</button></form>';
     		    // work with links
-    		    echo '<a class="link_button" href="./index.php?button='.$array_filename_segments[0].'">'.$array_filename_segments[0].'</a>';
+    		    echo '<a class="link_button_orange" href="./index.php?button='.$array_filename_segments[0].'">'.$array_filename_segments[0].'</a>';
     		}
     		?>
-			<a class="link_button" href="./index.php?button=today">today</a>
+			<a class="link_button_orange" href="./index.php?button=today">today</a>
 			<?php
                 if($auto_reload_string == "on")
                 {
-                    echo '<a title="turn auto reload every '.$refresh_auto.'min on or off" id="button_enabled" class="link_button" href="./index.php?button='.$parameter_last.'&auto_reload=off">auto_reload_on</a>';
+                    echo '<a title="turn auto reload every '.$refresh_auto.'min on or off" id="button_enabled" class="link_button_orange" href="./index.php?button='.$parameter_last.'&auto_reload=off">auto_reload_on</a>';
                 } else
                 {
-			         echo '<a title="turn auto reload every '.$refresh_auto.'min on or off" id="button_disabled" class="link_button" href="./index.php?button='.$parameter_last.'&auto_reload=on">auto_reload_off</a>';
+			         echo '<a title="turn auto reload every '.$refresh_auto.'min on or off" id="button_disabled" class="link_button_orange" href="./index.php?button='.$parameter_last.'&auto_reload=on">auto_reload_off</a>';
                 }
 			?>
 
