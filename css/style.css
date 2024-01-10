@@ -1,0 +1,51 @@
+.form {
+	position: relative;
+	float: left;
+}
+
+body, html {
+	width: 100%;
+	height: 100%;
+}
+
+.link_button_orange {
+	background-color: darkorange;
+	color: white;
+	border: 2px solid orange;
+	padding: 3px 5px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+}
+
+a:hover.link_button_orange {
+	color: black;
+	background-color: white;
+}
+
+.link_button_blue {
+	background-color: cornflowerblue;
+	color: white;
+	border: 2px solid blue;
+	padding: 3px 5px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+}
+
+a:hover.link_button_blue {
+	color: black;
+	background-color: white;
+}
+
+#button_disabled {
+	background-color: red;
+	color: white;
+	border: 2px solid orange;
+}
+
+#button_enabled {
+	background-color: green;
+	color: white;
+	border: 2px solid orange;
+}
