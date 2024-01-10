@@ -30,14 +30,22 @@ PS: yes really could not think of a shorter name X-D
 
 ==== PROBLEMS ====
 
+=== pc halts during boot ===
+
+description: the USB connected inverter during boot sends a bunch of data,
+that might be interpreted by the computer as "keyboard" input
+and hence stops the boot process (workaround: restart computer until successfull boot up)
+
+(it is a really ugly workaround) 
+
+tried_that: tried to use a galvanic usb separator, if it would help prevent the boot (sometimes)
+but did not help
+
 === non-senese-values ===
 
 solution: in WatchPower, try to (taskbar) r-click on WatchPower-symbol -> switch off and on DEBUG mode (checkbox)
 
-description: lately discovered... that not only does the USB connected inverter during boot send a bunch of stuff, that might be 
-interpreted by the computer as "keyboard" input and hence, stop the boot process (solution: off/on... no good)
-
-also: it started reporting nonsensical values for battery voltage (on the display it shows the correct voltage)
+ it started reporting nonsensical values for battery voltage (on the display it shows the correct voltage)
 
 but in the data field[10] is supposed to be battery voltage: 00.40V (#wtf!?)
 
@@ -48,11 +56,4 @@ for comparison: field[10] says: 49.70V
 
 2024-01-06
 2024-01-06 00:00:05 231.5 50.0 229.9 50.0 0068 0030 001 348 49.70 000 075 0025 0000 000.0 00.00 00002 00010000 00 00 00000 010
-
-what was changed?
-
-not much, tried to use a galvanic usb separator, if it would help prevent the boot (sometimes)
-but did not help (off/on it is... )
-
-but the other values are meassured correctly/transmitted correctly, so it can not be the problem.
 
