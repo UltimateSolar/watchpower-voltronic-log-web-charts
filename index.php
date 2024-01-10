@@ -1,7 +1,7 @@
 <?php
 
 date_default_timezone_set('CET'); // modify if not Europe/Berlin
-$title = "=== watchpower-voltronic-log-web-charts v1.7 ===";
+$title = "=== watchpower-voltronic-log-web-charts v1.5 ===";
 
 /* what is it?
  * nice graphical web view of voltronic-masterpower-watchpower output logs
@@ -122,7 +122,7 @@ foreach ($array_files_show as $key => $value)
 {
     $fileName = $value;
     $fileName_and_path = $path2data."/".$fileName." USB-QPIGS.log";
-    $lines = file($fileName_and_path) or die("can't open ".$fileName." file"); // changes "2023-10-30" back to full filename "2023-10-30 USB-QPIGS.log"
+    $lines = file($fileName_and_path) or die("can't open ".$filename_and_path." file"); // changes "2023-10-30" back to full filename "2023-10-30 USB-QPIGS.log"
 
     // reduce dataset if too large
     $lines_less = array();
@@ -132,11 +132,8 @@ foreach ($array_files_show as $key => $value)
             $lines_less[] = $value;
         }
     }
-    
-    // $before = count($lines); // 1176
-    // $after = count($lines_less); // 588
-    
-    // Durchgehen des Arrays und Anzeigen des HTML-Quelltexts inkl. Zeilennummern
+
+    // generate chart.js strings
     $target = count($lines_less);
     for($i=0;$i<$target;$i++)
     {
@@ -178,7 +175,7 @@ foreach ($array_files_show as $key => $value)
                 $array_stats[$i]["timestamp"] = $date_timestamp;
 
                 // search all elements of this array // replace by nothing  // in this string
-                $chart_data_string_date = $chart_data_string_date.$date_timestamp.", ";
+                $chart_data_string_date = $chart_data_string_date.'"'.$date_timestamp.'", ';
             }
             else
             {
@@ -211,7 +208,7 @@ foreach ($array_files_show as $key => $value)
             $watts = ltrim($watts, '0'); // delete all leading 000123
             if(empty($watts)) $watts = "0"; // if value was 0000 it would be empty now so assign minimum value
             // search all elements of this array // replace by nothing  // in this string
-            $chart_data_string_used_watts = $chart_data_string_used_watts.$watts.", ";
+            $chart_data_string_used_watts = $chart_data_string_used_watts.'"'.$watts.'", ';
             
             $stats_kWh_used = $stats_kWh_used + ($watts * $time_diff_h); // calc kWh
             $stats_kWh_used_by_inverter = $stats_kWh_used_by_inverter + ($watts_used_by_inverter * $time_diff_h); // calc kWh
@@ -219,7 +216,7 @@ foreach ($array_files_show as $key => $value)
         
         if(isset($array_line[10])) // field 10 = batt voltage
         {
-            $chart_data_string_batt_volt = $chart_data_string_batt_volt.$array_line[10].", ";
+            $chart_data_string_batt_volt = $chart_data_string_batt_volt.'"'.$array_line[10].'", ';
         }
 
         if(isset($array_line[21])) // field 21 = watts PV input?
@@ -228,7 +225,7 @@ foreach ($array_files_show as $key => $value)
             $watts = ltrim($watts, '0'); // delete all leading 000123
             if(empty($watts)) $watts = "0"; // if value was 0000 it would be empty now so assign minimum value
             // search all elements of this array // replace by nothing  // in this string
-            $chart_data_string_solar_input_watts = $chart_data_string_solar_input_watts.$watts.", ";
+            $chart_data_string_solar_input_watts = $chart_data_string_solar_input_watts.'"'.$watts.'", ';
 
             $stats_kWh_produced = $stats_kWh_produced + ($watts * $time_diff_h); // calc kWh
         }
