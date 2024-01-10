@@ -28,9 +28,13 @@ o so users can (better) visualize their energy production & consumption
 
 PS: yes really could not think of a shorter name X-D
 
-=== PROBLEMS === 
+==== PROBLEMS ====
 
-lately discovered... that not only does the USB connected inverter during boot send a bunch of stuff, that might be 
+=== non-senese-values ===
+
+solution: in WatchPower, try to (taskbar) r-click on WatchPower-symbol -> switch off and on DEBUG mode (checkbox)
+
+description: lately discovered... that not only does the USB connected inverter during boot send a bunch of stuff, that might be 
 interpreted by the computer as "keyboard" input and hence, stop the boot process (solution: off/on... no good)
 
 also: it started reporting nonsensical values for battery voltage (on the display it shows the correct voltage)
