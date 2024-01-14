@@ -292,7 +292,7 @@ const data = [
 <body>
 	<div id="div1" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%;">
     	<div id="div2" style="position: relative; float: left; min-width: 100%;">
-    		<?php echo "stats for selected dates: ".$stats_kWh_produced." kWh produced, ".$stats_kWh_used." kWh used by AC Out, inverter used: ".$stats_kWh_used_by_inverter." kWh "; ?>
+    		<?php echo "stats for selected dates: kWh produced: ".$stats_kWh_produced.", kWh used: ".$stats_kWh_used.", inverter (".$watts_used_by_inverter."W) used: ".$stats_kWh_used_by_inverter." kWh "; ?>
     	</div>
     	<div id="div3" style="position: relative; float: left; min-width: 100%;">
     		<!-- <form class="form" action="index.php" method="post"><button name="button" value="ShowAll" type="submit" class="btn btn-primary">ShowAll</button></form>  -->
